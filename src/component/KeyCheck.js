@@ -10,7 +10,6 @@ export default function KeyCheck() {
         }
     })
 
-
     return (
         <div>
             <h1>Latest Type Letter : {keypress}</h1>
