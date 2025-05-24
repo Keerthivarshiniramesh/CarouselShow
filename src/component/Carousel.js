@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import logo from "../assest/SAN Techn-logo.png";
+import LoadingPage from "./Loading";
 
 export default function Carousel() {
     const [isPlaying, setIsPlaying] = useState(true);
@@ -99,12 +100,8 @@ export default function Carousel() {
     };
 
     // Loading or fallback view
-    if (!currentMedia) {
-        return (
-            <div className="flex items-center justify-center w-screen h-screen bg-black text-white">
-                Loading...
-            </div>
-        );
+    if (!mediaItems || !currentMedia) {
+        return <LoadingPage />
     }
 
     return (
