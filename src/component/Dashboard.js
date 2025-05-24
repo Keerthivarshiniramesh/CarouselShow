@@ -97,10 +97,10 @@ export default function Dashboard() {
 
     // Save handler to upload form data
     const Save = () => {
-        if (!create.duration) {
-            alert('Please enter duration');
-            return;
-        }
+        // if (!create.duration) {
+        //     alert('Please enter duration');
+        //     return;
+        // }
 
         const formData = new FormData();
         formData.append('duration', create.duration);
@@ -122,17 +122,43 @@ export default function Dashboard() {
                 if (data.success) {
                     alert(data.message);
                     setSee(false);
-                    setCreate({ duration: '', image: [], video: [] });
+                    setCreate({ duration: '', image: [], video: [] })
                     setProgress(0);
                     setStatusMessage('');
+                    window.location.reload()
+                    // Optionally refresh slider list here
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(() => alert('Trouble connecting to server'))
+    };
+
+
+    // Delete images
+
+    const Delete = (id, filename, types) => {
+        fetch(`${url}/delete-file`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ id, type: types, filename })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload()
                     // Optionally refresh slider list here
                 } else {
                     alert(data.message);
                 }
             })
             .catch(() => alert('Trouble connecting to server'));
-    };
-
+    }
 
     return (
         <div>
@@ -163,7 +189,7 @@ export default function Dashboard() {
                                     <th className="p-3">Duration</th>
                                     <th className="p-3 hidden md:table-cell">Images</th>
                                     <th className="p-3 hidden md:table-cell">Videos</th>
-                                    <th className="p-3">Actions</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -180,12 +206,15 @@ export default function Dashboard() {
                                             <td className="p-3 hidden md:table-cell">
                                                 {slide.ImageSlide && slide.ImageSlide.length > 0 ? (
                                                     slide.ImageSlide.map((img, i) => (
-                                                        <img
-                                                            key={i}
-                                                            src={`${url}/${img.filepath}`}
-                                                            alt={`Slide Image ${i + 1}`}
-                                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                                        />
+                                                        <div className='flex justify-around items-center'>
+                                                            <img className='m-6'
+                                                                key={i}
+                                                                src={`${url}/${img.filepath}`}
+                                                                alt={`Slide Image ${i + 1}`}
+                                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                                            />
+                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger" role="button" onClick={() => Delete(slide.id, img.filename, 'ImageSlide')}></i>
+                                                        </div>
                                                     ))
                                                 ) : (
                                                     <span>No Images</span>
@@ -196,16 +225,17 @@ export default function Dashboard() {
                                             <td className="p-3 hidden md:table-cell">
                                                 {slide.VideoSlide && slide.VideoSlide.length > 0 ? (
                                                     slide.VideoSlide.map((video, i) => (
-                                                        <video key={i} width="100" height="100" controls src={`${url}/${video.filepath}`} />
+                                                        <div className='flex justify-around items-center'>
+                                                            <video key={i} width="100" height="100" controls src={`${url}/${video.filepath}`} className='m-6' />
+                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger" role="button" onClick={() => Delete(slide.id, video.filename, 'VideoSlide')}></i>
+                                                        </div>
                                                     ))
                                                 ) : (
                                                     <span>No Videos</span>
                                                 )}
                                             </td>
 
-                                            <td className="p-3 space-x-2">
-                                                <i className="bi bi-eye-fill text-green-600 hover:text-green-800 cursor-pointer"></i>
-                                            </td>
+
                                         </tr>
                                     ))}
                             </tbody>
@@ -279,11 +309,11 @@ export default function Dashboard() {
                                         setProgress(0);
                                         setStatusMessage('');
                                     }}
-                                    className="btn btn-outline btn-warning"
+                                    className="bg-gray-100 hover:bg-gray-200 text-black font-semibold py-2 px-4 rounded"
                                 >
                                     Close
                                 </button>
-                                <button onClick={Save} className="btn btn-outline btn-success">
+                                <button onClick={Save} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold py-2 px-4 rounded border border-white">
                                     Save
                                 </button>
                             </div>
@@ -291,6 +321,6 @@ export default function Dashboard() {
                     </div>
                 )}
             </section>
-        </div>
+        </div >
     );
 }

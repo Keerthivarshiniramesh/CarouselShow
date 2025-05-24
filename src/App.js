@@ -7,6 +7,7 @@ import { useContext } from 'react';
 import { DContext } from './component/Provider';
 import Dashboard from './component/Dashboard';
 import Register from './component/Register';
+import Carousel from './component/Carousel';
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
 
     // <KeyCheck />
     <Routes>
+      <Route path='/' element={<Carousel />} />
       <Route path='/admin' element={Auth ? <Dashboard /> : <Login />} />
       <Route path='/register' element={<Register />} />
       <Route />
