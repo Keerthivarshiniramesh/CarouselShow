@@ -23,7 +23,7 @@ export default function Carousel() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    // Fetch slides from server
+
     useEffect(() => {
         fetch(`${url}/getSliders`, {
             method: "GET",
@@ -41,7 +41,7 @@ export default function Carousel() {
             .catch((err) => console.error("Error fetching sliders:", err));
     }, [url]);
 
-    // Update mediaItems and currentMedia on slide/media change
+
     useEffect(() => {
         if (slides.length === 0) return;
 
@@ -55,7 +55,7 @@ export default function Carousel() {
         setCurrentMedia(items[currentMediaIndex] || null);
     }, [slides, currentSlideIndex, currentMediaIndex]);
 
-    // Handle timeout for image transitions (videos handled with onEnded)
+
     useEffect(() => {
         if (!mediaItems.length || !currentMedia || !isPlaying) return;
 
@@ -71,18 +71,17 @@ export default function Carousel() {
         return () => clearTimeout(timeoutRef.current);
     }, [mediaItems, currentMedia, isPlaying]);
 
-    // Reset media index on slide change
+
     useEffect(() => {
         setCurrentMediaIndex(0);
     }, [currentSlideIndex]);
 
-    // Advance to next media or slide
+
     const advanceToNext = (mediaLength) => {
         setCurrentMediaIndex((prev) => {
             if (prev + 1 === mediaLength) {
                 let nextSlide = (currentSlideIndex + 1) % slides.length;
 
-                // Skip empty slides
                 while (
                     slides[nextSlide] &&
                     !slides[nextSlide].ImageSlide?.length &&
