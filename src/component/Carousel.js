@@ -136,26 +136,6 @@ export default function Carousel() {
     // Create audio ref
     const audioRef = useRef(new Audio(audios));
 
-    const requestPermission = () => {
-        if (!('Notification' in window)) {
-            alert('This browser does not support notifications.');
-            return;
-        }
-        Notification.requestPermission().then((perm) => {
-            setPermission(perm);
-            if (perm === 'granted') {
-                new Notification('Thanks for enabling notifications!');
-            } else {
-                alert('Notification permission denied.');
-            }
-        });
-    };
-
-
-    useEffect(() => {
-        requestNotificationPermission()
-        StartAlert()
-    })
 
     // Setup audio on mount
     useEffect(() => {
@@ -199,7 +179,7 @@ export default function Carousel() {
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Enter') {
-                requestNotificationPermission();
+
                 setIsPlaying(prev => !prev);
                 setShowControls(true);
                 setTimeout(() => setShowControls(false), 2000);
