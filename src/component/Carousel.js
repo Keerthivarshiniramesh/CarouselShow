@@ -214,7 +214,7 @@ export default function Carousel() {
     useEffect(() => {
         if (!isPlaying || slides.length === 0) return;
 
-        const duration = 3000; // 3 seconds
+        const duration = 5000; // 3 seconds
         timeoutRef.current = setTimeout(() => {
             setCurrentIndex((prev) => (prev + 1) % slides.length);
         }, duration);
