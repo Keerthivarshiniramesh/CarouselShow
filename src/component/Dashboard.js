@@ -12,7 +12,7 @@ export default function Dashboard() {
     const [create, setCreate] = useState({
         duration: '',
         image: [], // compressed images will go here
-        video: []
+        pdf: []
     });
 
     const [progress, setProgress] = useState(0);
@@ -79,13 +79,11 @@ export default function Dashboard() {
                     image: [...(prev.image || []), ...compressedFiles]
                 }));
             }
-            else if (key === 'video') {
-                // No compression for videos, just append
-                setCreate(prev => ({
-                    ...prev,
-                    video: [...(prev.video || []), ...Array.from(files)]
-                }));
-            }
+            // else if (key === 'pdf') {
+            //     // No compression for videos, just append
+
+
+            // }
         } else {
             // Normal input (e.g. duration)
             setCreate(prev => ({
@@ -108,9 +106,7 @@ export default function Dashboard() {
         create.image.forEach(file => {
             formData.append('ImageSlide', file);
         });
-        create.video.forEach(file => {
-            formData.append('VideoSlide', file);
-        });
+
 
         fetch(`${url}/create-slide`, {
             method: 'POST',
@@ -174,7 +170,7 @@ export default function Dashboard() {
                                     className="bg-blue-800 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded shadow"
                                     onClick={() => setSee(true)}
                                 >
-                                    Upload Images or Videos
+                                    Upload Images
                                 </button>
                             </div>
                         </div>
@@ -187,8 +183,9 @@ export default function Dashboard() {
                                 <tr>
                                     <th className="p-3">S.No</th>
                                     <th className="p-3">Duration</th>
-                                    <th className="p-3 hidden md:table-cell">Images</th>
-                                    <th className="p-3 hidden md:table-cell">Videos</th>
+
+                                    <th className="p-3 ">Images</th>
+                                    {/* <th className="p-3 hidden md:table-cell">PDF</th> */}
 
                                 </tr>
                             </thead>
@@ -203,35 +200,21 @@ export default function Dashboard() {
                                             <td className="p-3 uppercase">{slide.duration}</td>
 
                                             {/* Images */}
-                                            <td className="p-3 hidden md:table-cell">
+                                            <td className="p-3  ">
                                                 {slide.ImageSlide && slide.ImageSlide.length > 0 ? (
                                                     slide.ImageSlide.map((img, i) => (
-                                                        <div className='flex justify-around items-center'>
-                                                            <img className='m-6'
+                                                        <div className='flex justify-start items-center'>
+                                                            <img className='my-6'
                                                                 key={i}
                                                                 src={`${url}/${img.filepath}`}
                                                                 alt={`Slide Image ${i + 1}`}
                                                                 style={{ width: '50px', height: '50px', marginRight: '5px' }}
                                                             />
-                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger" role="button" onClick={() => Delete(slide.id, img.filename, 'ImageSlide')}></i>
+                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger text-red-600" role="button" onClick={() => Delete(slide.id, img.filename, 'ImageSlide')}></i>
                                                         </div>
                                                     ))
                                                 ) : (
                                                     <span>No Images</span>
-                                                )}
-                                            </td>
-
-                                            {/* Videos */}
-                                            <td className="p-3 hidden md:table-cell">
-                                                {slide.VideoSlide && slide.VideoSlide.length > 0 ? (
-                                                    slide.VideoSlide.map((video, i) => (
-                                                        <div className='flex justify-around items-center'>
-                                                            <video key={i} width="100" height="100" controls src={`${url}/${video.filepath}`} className='m-6' />
-                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger" role="button" onClick={() => Delete(slide.id, video.filename, 'VideoSlide')}></i>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <span>No Videos</span>
                                                 )}
                                             </td>
 
@@ -247,7 +230,7 @@ export default function Dashboard() {
                 {see && (
                     <div className="fixed inset-0 z-30 flex justify-center items-center bg-white/75">
                         <div className="w-full max-w-3xl max-h-[90vh] overflow-auto bg-white rounded-lg shadow-lg p-6">
-                            <h4 className="text-center text-info text-2xl font-semibold mb-6">Upload Images / Videos</h4>
+                            <h4 className="text-center text-info text-2xl font-semibold mb-6">Upload Images </h4>
 
                             <div className="flex flex-wrap -mx-2">
                                 <div className="w-full md:w-1/2 px-2 mb-4">
@@ -281,15 +264,15 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap -mx-2 gap-7">
+                            {/* <div className="flex flex-wrap -mx-2 gap-7">
                                 <div className="w-full md:w-1/2 px-2 mb-4">
-                                    <label className="block text-info font-medium mb-1">Video Upload:</label>
+                                    <label className="block text-info font-medium mb-1">PDF Upload:</label>
                                     <input
                                         accept="video/mp4,video/webm,video/ogg"
                                         type="file"
                                         multiple
                                         className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
-                                        onChange={e => Create(e, 'video')}
+                                        onChange={e => Create(e, 'pdf')}
                                     />
                                     {create.video.length > 0 && (
                                         <ul className="mt-2 text-sm text-gray-600">
@@ -299,7 +282,7 @@ export default function Dashboard() {
                                         </ul>
                                     )}
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="flex justify-between mt-8">
                                 <button
