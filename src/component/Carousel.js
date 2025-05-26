@@ -126,7 +126,7 @@ import logo from "../assest/SAN Techn-logo.png";
 import LoadingPage from "./Loading";
 
 export default function Carousel() {
-    const [isPlaying, setIsPlaying] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [slides, setSlides] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showControls, setShowControls] = useState(false);
@@ -136,6 +136,38 @@ export default function Carousel() {
     // Create audio ref
     const audioRef = useRef(new Audio(audios));
 
+    const requestNotificationPermission = async () => {
+        if (!('Notification' in window)) {
+            console.log('This browser does not support notifications.');
+            alert('This browser does not support notifications.')
+            return;
+        }
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
+        } else {
+            console.log('Notification permission denied.');
+        }
+    };
+
+    const showNotification = (title, options) => {
+        if (Notification.permission === 'granted') {
+            const notification = new Notification(title, options);
+            setTimeout(() => {
+                notification.close();
+            }, 5000)
+        } else {
+            alert("Please enable notifications on the browser's settings.")
+        }
+    };
+
+
+    useEffect(() => {
+        requestNotificationPermission()
+        StartAlert()
+    })
+
     // Setup audio on mount
     useEffect(() => {
         const audio = audioRef.current;
@@ -144,7 +176,7 @@ export default function Carousel() {
         if (isPlaying) {
             audio.play().catch(() => {
                 // handle autoplay restrictions here if needed
-                
+
             });
         } else {
             audio.pause();
