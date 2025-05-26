@@ -136,30 +136,19 @@ export default function Carousel() {
     // Create audio ref
     const audioRef = useRef(new Audio(audios));
 
-    const requestNotificationPermission = async () => {
+    const requestPermission = () => {
         if (!('Notification' in window)) {
-            console.log('This browser does not support notifications.');
-            alert('This browser does not support notifications.')
+            alert('This browser does not support notifications.');
             return;
         }
-
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            console.log('Notification permission granted.');
-        } else {
-            console.log('Notification permission denied.');
-        }
-    };
-
-    const showNotification = (title, options) => {
-        if (Notification.permission === 'granted') {
-            const notification = new Notification(title, options);
-            setTimeout(() => {
-                notification.close();
-            }, 5000)
-        } else {
-            alert("Please enable notifications on the browser's settings.")
-        }
+        Notification.requestPermission().then((perm) => {
+            setPermission(perm);
+            if (perm === 'granted') {
+                new Notification('Thanks for enabling notifications!');
+            } else {
+                alert('Notification permission denied.');
+            }
+        });
     };
 
 
@@ -209,15 +198,18 @@ export default function Carousel() {
     // Keyboard control: Enter toggles play/pause
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === "Enter") {
-                setIsPlaying((prev) => !prev);
+            if (e.key === 'Enter') {
+                requestNotificationPermission();
+                setIsPlaying(prev => !prev);
                 setShowControls(true);
                 setTimeout(() => setShowControls(false), 2000);
             }
         };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
+
 
     // Slide transition logic
     useEffect(() => {
