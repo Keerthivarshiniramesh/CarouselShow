@@ -107,6 +107,7 @@ export default function Carousel() {
 
     return (
         <div className="relative w-screen h-screen overflow-hidden bg-white">
+            <img src={logo} alt="Logo" className="w-32 absolute bottom-0 right-20 z-10" />
 
 
             {
