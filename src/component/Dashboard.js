@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import imageCompression from 'browser-image-compression';
+import React, { useEffect, useState } from 'react'
+import imageCompression from 'browser-image-compression'
 import Header from './Header';
 
 export default function Dashboard() {
-    const [see, setSee] = useState(false);
-    const url = process.env.REACT_APP_URL;
+    const [see, setSee] = useState(false)
+    const url = process.env.REACT_APP_URL
 
-    const [slider, setSlider] = useState(null);
+    const [slider, setSlider] = useState(null)
 
     // Form data state: duration, compressed images, videos
     const [create, setCreate] = useState({
@@ -15,8 +15,8 @@ export default function Dashboard() {
         pdf: []
     });
 
-    const [progress, setProgress] = useState(0);
-    const [statusMessage, setStatusMessage] = useState('');
+    const [progress, setProgress] = useState(0)
+    const [statusMessage, setStatusMessage] = useState('')
 
     // Fetch sliders on mount
     useEffect(() => {
@@ -27,15 +27,15 @@ export default function Dashboard() {
             .then(res => res.json())
             .then(data => {
                 if (data.success === true) {
-                    setSlider(data.sliders);
+                    setSlider(data.sliders)
                 } else {
-                    alert(data.message);
+                    alert(data.message)
                 }
             })
             .catch(err => {
-                console.log('Error fetching in checkauth', err);
-            });
-    }, [url]);
+                console.log('Error fetching in checkauth', err)
+            })
+    }, [url])
 
     // Handle duration input and file input changes
     const Create = async (e, key) => {
@@ -64,16 +64,16 @@ export default function Dashboard() {
                             lastModified: Date.now()
                         });
 
-                        compressedFiles.push(newFile);
+                        compressedFiles.push(newFile)
                     } catch (error) {
-                        console.error('Compression failed:', error);
+                        console.error('Compression failed:', error)
                         compressedFiles.push(file); // fallback
                     }
 
-                    setProgress(((i + 1) / files.length) * 100);
+                    setProgress(((i + 1) / files.length) * 100)
                 }
 
-                setStatusMessage('Compression complete!');
+                setStatusMessage('Compression complete!')
                 setCreate(prev => ({
                     ...prev,
                     image: [...(prev.image || []), ...compressedFiles]
@@ -100,8 +100,8 @@ export default function Dashboard() {
         //     return;
         // }
 
-        const formData = new FormData();
-        formData.append('duration', create.duration);
+        const formData = new FormData()
+        formData.append('duration', create.duration)
 
         create.image.forEach(file => {
             formData.append('ImageSlide', file);
@@ -116,15 +116,15 @@ export default function Dashboard() {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    setSee(false);
+                    alert(data.message)
+                    setSee(false)
                     setCreate({ duration: '', image: [], video: [] })
-                    setProgress(0);
-                    setStatusMessage('');
+                    setProgress(0)
+                    setStatusMessage('')
                     window.location.reload()
-                    // Optionally refresh slider list here
+
                 } else {
-                    alert(data.message);
+                    alert(data.message)
                 }
             })
             .catch(() => alert('Trouble connecting to server'))
@@ -146,11 +146,11 @@ export default function Dashboard() {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    alert(data.message)
                     window.location.reload()
-                    // Optionally refresh slider list here
+
                 } else {
-                    alert(data.message);
+                    alert(data.message)
                 }
             })
             .catch(() => alert('Trouble connecting to server'));
@@ -203,7 +203,7 @@ export default function Dashboard() {
                                             <td className="p-3  ">
                                                 {slide.ImageSlide && slide.ImageSlide.length > 0 ? (
                                                     slide.ImageSlide.map((img, i) => (
-                                                        <div className='flex justify-start items-center'>
+                                                        <div className='flex justify-start items-center' key={i}>
                                                             <img className='my-6'
                                                                 key={i}
                                                                 src={`${url}/${img.filepath}`}
@@ -217,8 +217,6 @@ export default function Dashboard() {
                                                     <span>No Images</span>
                                                 )}
                                             </td>
-
-
                                         </tr>
                                     ))}
                             </tbody>
@@ -288,7 +286,7 @@ export default function Dashboard() {
                                 <button
                                     onClick={() => {
                                         setSee(false);
-                                        setCreate({ duration: '', image: [], video: [] });
+                                        setCreate({ duration: '', image: [] });
                                         setProgress(0);
                                         setStatusMessage('');
                                     }}

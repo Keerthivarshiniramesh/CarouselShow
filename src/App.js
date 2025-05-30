@@ -13,6 +13,15 @@ import Carousel from './component/Carousel';
 function App() {
 
   const { Auth } = useContext(DContext)
+
+  if (Auth==null) {
+    return (
+      <div>
+        Loading.....
+      </div>
+    )
+  }
+
   return (
 
     // <KeyCheck />
