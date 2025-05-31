@@ -1,15 +1,17 @@
 
 import React, { useEffect, useState, useRef } from "react"
 import audios from '../assest/piano.mp3' // assuming audios is the path to the mp3 file
-import logo from "../assest/SAN Techn-logo.png"
+// import logo from "../assest/SAN Techn-logo.png"
 import LoadingPage from "./Loading"
 
 export default function Carousel() {
     const [isPlaying, setIsPlaying] = useState(false)
     const [slides, setSlides] = useState([])
-    const [currentIndex, setCurrentIndex] = useState(0)
+
     const [showControls, setShowControls] = useState(false)
     const timeoutRef = useRef(null)
+    const videoRef = useRef(null)
+    const imageRef = useRef(null)
     const [duration, setDuration] = useState(null)
 
     const [click, setClick] = useState(true)
@@ -65,7 +67,7 @@ export default function Carousel() {
             .then((data) => {
                 if (data.success) {
 
-                    const imageSlides = data.sliders.flatMap(slide => slide.ImageSlide || [])
+                    const imageSlides = data.sliders
                     setSlides(imageSlides);
                     const timers = data.sliders.find(slide => slide.duration)
                     console.log("Duations", typeof (timers.duration))
@@ -93,18 +95,108 @@ export default function Carousel() {
     }, []);
     // console.log(typeof (duration))
 
+
+    const [mediaType, setMediaType] = useState('image')
+    const [mediaIndex, setMediaIndex] = useState(0)
+
+    // useEffect(() => {
+    //     if (slides && slides.length > 0) {
+    //         if (slides[0].ImageSlide && slides[0].ImageSlide.length > 0) {
+    //             setMedialength(slides[0].ImageSlide.length)
+    //         }
+
+    //         if (slides[0].VideoSlide && slides[0].VideoSlide.length > 0) {
+    //             setMedialength(slides[0].VideoSlide.length)
+    //         }
+    //     }
+    // }, [slides, isPlaying])
+
+
     // Slide transition logic
     useEffect(() => {
         if (!isPlaying || slides.length === 0) return
 
         const durations = duration
 
-        timeoutRef.current = setTimeout(() => {
-            setCurrentIndex((prev) => (prev + 1) % slides.length)
-        }, durations);
 
-        return () => clearTimeout(timeoutRef.current)
-    }, [isPlaying, slides, currentIndex])
+
+        if (slides) {
+
+            const slide = slides[0];
+            const videos = slide.VideoSlide || [];
+            const images = slide.ImageSlide || [];
+            console.log(images)
+
+            if (mediaType === 'video' && videos.length > 0 && mediaIndex < videos.length) {
+                const video = videoRef.current;
+
+
+                if (video && video.src) {
+                    console.log("Trying to play video:", video.src)
+
+                    audio.pause()
+                    video.play().catch(err => {
+                        console.error("Video playback error:", err)
+                    });
+
+
+
+
+                    const handleEnded = () => {
+                        if (mediaIndex + 1 < videos.length) {
+                            setMediaIndex(mediaIndex + 1);
+                        } else if (images.length > 0) {
+                            setMediaType('image')
+                            setMediaIndex(0)
+                        } else {
+                            setMediaIndex(0);
+
+                        }
+                    };
+
+                    video.addEventListener("ended", handleEnded)
+
+                    return () => {
+                        video.removeEventListener("ended", handleEnded)
+                        video.pause();
+                    };
+                }
+            }
+            else if (mediaType === 'image' && images.length > 0 && mediaIndex < images.length) {
+                console.log(images)
+                const image = imageRef.current
+                if (image && image.src) {
+                    console.log("Trying to play video:", image.src)
+
+                    audio.play()
+                }
+
+                timeoutRef.current = setTimeout(() => {
+                    if (mediaIndex + 1 < images.length) {
+                        setMediaIndex(mediaIndex + 1)
+                    } else if (videos.length > 0) {
+                        setMediaType('video')
+                        setMediaIndex(0)
+                    } else {
+                        setMediaIndex(0)
+                    }
+                }, durations)
+
+                return () => clearTimeout(timeoutRef.current);
+            }
+
+        }
+    }, [isPlaying, slides, mediaType, mediaIndex])
+
+
+    // slides.map((media, index) => (
+
+    //     media.ImageSlide && media.ImageSlide.map((image, i) =>
+    //     (
+    //         console.log(image.filename)
+    //     ))
+    // ))
+
 
     if (!slides.length || !duration) {
         return <LoadingPage />
@@ -138,16 +230,45 @@ export default function Carousel() {
                 </div>
             }
 
-            {/* Render all images, fading between them */}
-            {slides.map((media, index) => (
-                <img
-                    key={media.filepath}
-                    src={`${url}/${media.filepath}`}
-                    alt={`Slide ${index + 1}`}
-                    className={`absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out ${index === currentIndex ? "opacity-100 z-0" : "opacity-0 z-0"
-                        }`}
-                />
-            ))}
+            
+
+            {slides.length > 0 && (() => {
+                const currentSlide = slides[0];
+                const images = currentSlide.ImageSlide || []
+                const videos = currentSlide.VideoSlide || []
+
+                const currentImage = images[mediaIndex]
+                const currentVideo = videos[mediaIndex]
+
+                return (
+                    <>
+                        {mediaType === 'image' && currentImage?.filename && (
+                            <img
+                                ref={imageRef}
+                                key={currentImage.filename}
+                                src={`${url}/stream/${currentImage.filename}`}
+                                alt={`Slide ${mediaIndex + 1}`}
+                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0"
+                            />
+                        )}
+
+                        {mediaType === 'video' && currentVideo?.filename && (
+                            <video
+                                ref={videoRef}
+                                key={currentVideo.filename}
+                                src={`${url}/stream/${currentVideo.filename}`}
+                                controls
+                                autoPlay
+                                muted
+                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0"
+                            />
+                        )}
+                    </>
+                )
+            })()}
+
+            
+
 
             {/* Play/Pause overlay shown briefly on Enter */}
             {showControls && (
