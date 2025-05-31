@@ -18,12 +18,12 @@ function Provider(props) {
             })
                 .then(res => res.json())
                 .then(data => {
+                    console.log(data)
                     if (data.success === true) {
                         setAuth(data.user)
                     }
                     else {
                         setAuth(false)
-                        console.log(data.messsage)
                     }
                 })
                 .catch(err => {
