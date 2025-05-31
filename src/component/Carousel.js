@@ -31,6 +31,7 @@ export default function Carousel() {
     }, [])
     const handlePlay = () => {
 
+
         audio.play()
         setIsPlaying(true)
         setClick(false)
@@ -79,11 +80,13 @@ export default function Carousel() {
             .catch((err) => console.error("Error fetching sliders:", err))
     }, [url]);
 
-    // Keyboard control: Enter toggles play/pause
+    // Keyboard control
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Enter') {
-
+                // const video = videoRef.current;
+                // // video full screen
+                // video.requestFullscreen()
                 setIsPlaying(prev => !prev)
                 setShowControls(true)
                 setTimeout(() => setShowControls(false), 2000)
@@ -93,32 +96,18 @@ export default function Carousel() {
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, []);
-    // console.log(typeof (duration))
+   
 
 
     const [mediaType, setMediaType] = useState('image')
     const [mediaIndex, setMediaIndex] = useState(0)
 
-    // useEffect(() => {
-    //     if (slides && slides.length > 0) {
-    //         if (slides[0].ImageSlide && slides[0].ImageSlide.length > 0) {
-    //             setMedialength(slides[0].ImageSlide.length)
-    //         }
 
-    //         if (slides[0].VideoSlide && slides[0].VideoSlide.length > 0) {
-    //             setMedialength(slides[0].VideoSlide.length)
-    //         }
-    //     }
-    // }, [slides, isPlaying])
-
-
-    // Slide transition logic
+    // Slide logic
     useEffect(() => {
         if (!isPlaying || slides.length === 0) return
 
         const durations = duration
-
-
 
         if (slides) {
 
@@ -134,13 +123,15 @@ export default function Carousel() {
                 if (video && video.src) {
                     console.log("Trying to play video:", video.src)
 
-                    audio.pause()
+                    if (video && video.audioTracks && video.audioTracks.length > 0) {
+                        audio.pause()
+                    } else {
+                        audio.play()
+                    }
+
                     video.play().catch(err => {
                         console.error("Video playback error:", err)
-                    });
-
-
-
+                    })
 
                     const handleEnded = () => {
                         if (mediaIndex + 1 < videos.length) {
@@ -189,6 +180,14 @@ export default function Carousel() {
     }, [isPlaying, slides, mediaType, mediaIndex])
 
 
+
+    // useEffect(() => {
+    //     const Video = videoRef.current
+
+
+
+    // }, [videoRef])
+
     // slides.map((media, index) => (
 
     //     media.ImageSlide && media.ImageSlide.map((image, i) =>
@@ -230,7 +229,7 @@ export default function Carousel() {
                 </div>
             }
 
-            
+
 
             {slides.length > 0 && (() => {
                 const currentSlide = slides[0];
@@ -248,7 +247,7 @@ export default function Carousel() {
                                 key={currentImage.filename}
                                 src={`${url}/stream/${currentImage.filename}`}
                                 alt={`Slide ${mediaIndex + 1}`}
-                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0"
+                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0 bg-white"
                             />
                         )}
 
@@ -257,17 +256,16 @@ export default function Carousel() {
                                 ref={videoRef}
                                 key={currentVideo.filename}
                                 src={`${url}/stream/${currentVideo.filename}`}
-                                controls
+
                                 autoPlay
-                                muted
-                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0"
+                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0 bg-white"
                             />
                         )}
                     </>
                 )
             })()}
 
-            
+
 
 
             {/* Play/Pause overlay shown briefly on Enter */}
