@@ -8,16 +8,17 @@ import { DContext } from './component/Provider';
 import Dashboard from './component/Dashboard';
 import Register from './component/Register';
 import Carousel from './component/Carousel';
+import LoadingPage from './component/Loading';
 
 
 function App() {
 
   const { Auth } = useContext(DContext)
 
-  if (Auth==null) {
+  if (Auth == null) {
     return (
       <div>
-        Loading.....
+        <LoadingPage />
       </div>
     )
   }
