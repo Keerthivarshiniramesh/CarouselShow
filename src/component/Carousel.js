@@ -84,9 +84,9 @@ export default function Carousel() {
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Enter') {
-                const video = videoRef.current;
-                // video full screen
-                video.requestFullscreen()
+                // const video = videoRef.current;
+                // // video full screen
+                // video.requestFullscreen()
                 setIsPlaying(prev => !prev)
                 setShowControls(true)
                 setTimeout(() => setShowControls(false), 2000)
@@ -96,12 +96,11 @@ export default function Carousel() {
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, []);
-    // console.log(typeof (duration))
+   
 
 
     const [mediaType, setMediaType] = useState('image')
     const [mediaIndex, setMediaIndex] = useState(0)
-
 
 
     // Slide logic
@@ -109,7 +108,6 @@ export default function Carousel() {
         if (!isPlaying || slides.length === 0) return
 
         const durations = duration
-
 
         if (slides) {
 
@@ -125,15 +123,15 @@ export default function Carousel() {
                 if (video && video.src) {
                     console.log("Trying to play video:", video.src)
 
-                    audio.pause()
+                    if (video && video.audioTracks && video.audioTracks.length > 0) {
+                        audio.pause()
+                    } else {
+                        audio.play()
+                    }
+
                     video.play().catch(err => {
                         console.error("Video playback error:", err)
-                    });
-
-                    setTimeout(() => {
-                        video.muted = false
-
-                    }, 1000);
+                    })
 
                     const handleEnded = () => {
                         if (mediaIndex + 1 < videos.length) {
@@ -258,9 +256,8 @@ export default function Carousel() {
                                 ref={videoRef}
                                 key={currentVideo.filename}
                                 src={`${url}/stream/${currentVideo.filename}`}
-                                controls
+
                                 autoPlay
-                                muted
                                 className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0 bg-white"
                             />
                         )}
