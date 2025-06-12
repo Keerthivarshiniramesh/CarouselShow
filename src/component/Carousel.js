@@ -96,11 +96,12 @@ export default function Carousel() {
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, []);
-   
+
 
 
     const [mediaType, setMediaType] = useState('image')
     const [mediaIndex, setMediaIndex] = useState(0)
+    const [loadImage, setLoadImage] = useState(false)
 
 
     // Slide logic
@@ -135,26 +136,28 @@ export default function Carousel() {
 
                     const handleEnded = () => {
                         if (mediaIndex + 1 < videos.length) {
-                            setMediaIndex(mediaIndex + 1);
+                            setMediaIndex(mediaIndex + 1)
                         } else if (images.length > 0) {
                             setMediaType('image')
                             setMediaIndex(0)
                         } else {
-                            setMediaIndex(0);
+                            setMediaIndex(0)
 
                         }
-                    };
+                    }
 
                     video.addEventListener("ended", handleEnded)
 
                     return () => {
                         video.removeEventListener("ended", handleEnded)
-                        video.pause();
-                    };
+                        video.pause()
+                    }
                 }
             }
             else if (mediaType === 'image' && images.length > 0 && mediaIndex < images.length) {
-                console.log(images)
+
+                const currentImage = images[mediaIndex]
+
                 const image = imageRef.current
                 if (image && image.src) {
                     console.log("Trying to play video:", image.src)
@@ -162,39 +165,55 @@ export default function Carousel() {
                     audio.play()
                 }
 
-                timeoutRef.current = setTimeout(() => {
-                    if (mediaIndex + 1 < images.length) {
-                        setMediaIndex(mediaIndex + 1)
-                    } else if (videos.length > 0) {
-                        setMediaType('video')
-                        setMediaIndex(0)
-                    } else {
-                        setMediaIndex(0)
-                    }
-                }, durations)
+                const img = new Image();    // create an off-screen image
+                img.src = `${url}/stream/${currentImage.filename}`;
 
-                return () => clearTimeout(timeoutRef.current);
+                // attach your callback **before** or **immediately after** setting src
+                img.onload = () => {
+                    console.log('✅ Image is fully loaded and ready to render')
+                    setLoadImage(true)
+                    timeoutRef.current = setTimeout(() => {
+                        if (mediaIndex + 1 < images.length) {
+                            setMediaIndex(mediaIndex + 1)
+                            setLoadImage(false)
+                            console.log("load finished")
+                        } else if (videos.length > 0) {
+                            setMediaType('video')
+                            setMediaIndex(0)
+                        } else {
+                            setMediaIndex(0)
+                        }
+                    }, durations)
+
+                }
+
+
+                img.onerror = () => {
+                    console.error('🚫 Failed to load the image')
+                    timeoutRef.current = setTimeout(() => {
+                        if (mediaIndex + 1 < images.length) {
+                            setMediaIndex(mediaIndex + 1)
+
+                            console.log("load finished")
+                        } else if (videos.length > 0) {
+                            setMediaType('video')
+                            setMediaIndex(0)
+                        } else {
+                            setMediaIndex(0)
+                            setLoadImage(true)
+                        }
+                    }, durations)
+                }
+
+
+                return () => clearTimeout(timeoutRef.current)
             }
 
         }
-    }, [isPlaying, slides, mediaType, mediaIndex])
+    }, [isPlaying, slides, mediaType, mediaIndex, loadImage])
 
 
 
-    // useEffect(() => {
-    //     const Video = videoRef.current
-
-
-
-    // }, [videoRef])
-
-    // slides.map((media, index) => (
-
-    //     media.ImageSlide && media.ImageSlide.map((image, i) =>
-    //     (
-    //         console.log(image.filename)
-    //     ))
-    // ))
 
 
     if (!slides.length || !duration) {
@@ -247,7 +266,8 @@ export default function Carousel() {
                                 key={currentImage.filename}
                                 src={`${url}/stream/${currentImage.filename}`}
                                 alt={`Slide ${mediaIndex + 1}`}
-                                className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0 bg-white"
+                                onLoad={() => setLoadImage(true)}
+                                className={`absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0 bg-white`}
                             />
                         )}
 
