@@ -99,10 +99,21 @@ export default function Carousel() {
 
 
 
-    const [mediaType, setMediaType] = useState('image')
+    const [mediaType, setMediaType] = useState(null)
     const [mediaIndex, setMediaIndex] = useState(0)
     const [loadImage, setLoadImage] = useState(false)
 
+
+    useEffect(() => {
+        if (slides.length > 0) {
+            const currentSlide = slides[0];
+            if (currentSlide.ImageSlide && currentSlide.ImageSlide.length > 0) {
+                setMediaType('image');
+            } else if (currentSlide.VideoSlide && currentSlide.VideoSlide.length > 0) {
+                setMediaType('video');
+            }
+        }
+    }, [slides]);
 
     // Slide logic
     useEffect(() => {
