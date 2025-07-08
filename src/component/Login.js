@@ -32,6 +32,7 @@ export default function Login() {
             .then(data => {
                 alert(data.message)
                 if (data.success === true) {
+                    console.log(data.user)
                     setAuth(data.user);
 
                 }

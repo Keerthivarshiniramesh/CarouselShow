@@ -287,7 +287,7 @@ export default function Carousel() {
                                 ref={videoRef}
                                 key={currentVideo.filename}
                                 src={`${url}/stream/${currentVideo.filename}`}
-
+                                loop={images.length === 0 && videos.length === 1}
                                 autoPlay
                                 className="absolute cursor-none inset-0 w-full h-full object-contain transition-opacity duration-1000 ease-in-out opacity-100 z-0 bg-white"
                             />

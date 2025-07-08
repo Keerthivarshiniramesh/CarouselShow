@@ -18,6 +18,8 @@ export default function Dashboard() {
     const [progress, setProgress] = useState(0)
     const [statusMessage, setStatusMessage] = useState('')
 
+
+
     // Fetch sliders on mount
     useEffect(() => {
         fetch(`${url}/getSliders`, {
@@ -143,9 +145,25 @@ export default function Dashboard() {
     };
 
 
-    // Delete images
+    // Delete many images 
+    let [deleteImages, setDeleteImages] = useState([])
+    const [selectedImages, setSelectedImages] = useState([]);
+    let [deleteView, setdeleteView] = useState(false)
+    let [ids, setnewId] = useState(null)
+    let [type, setTypes] = useState(null)
 
     const Delete = (id, filename, types) => {
+
+        setSelectedImages(prev =>
+            prev.includes(filename) ? prev.filter(f => f !== filename) : [...prev, filename])
+        setDeleteImages(prev => [...prev, filename])
+        setnewId(id)
+        setTypes(types)
+        setdeleteView(true)
+
+    }
+
+    const DeleteAction = () => {
         fetch(`${url}/delete-file`, {
             method: 'DELETE',
             credentials: 'include',
@@ -153,7 +171,7 @@ export default function Dashboard() {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
-            body: JSON.stringify({ id, type: types, filename })
+            body: JSON.stringify({ id: ids, type: type, filenames: deleteImages })
         })
             .then(res => res.json())
             .then(data => {
@@ -171,7 +189,7 @@ export default function Dashboard() {
     return (
         <div>
             <Header />
-            <section className="bg-gradient-to-br from-blue-200 to-blue-5000 h-[100vh]">
+            <section className="bg-gradient-to-br from-blue-200 to-blue-100 h-[100vh]">
                 <main className="w-full py-6 px-4 flex-grow ">
                     <h3 className="text-center text-2xl font-semibold mb-6">Sliders</h3>
 
@@ -193,11 +211,22 @@ export default function Dashboard() {
                         <table className="w-full text-sm text-left rounded-lg overflow-hidden">
                             <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
                                 <tr>
-                                    <th className="p-3">S.No</th>
+                                    <th className="p-3 hidden lg:table-cell">S.No</th>
                                     <th className="p-3">Duration</th>
 
-                                    <th className="p-3 ">Images</th>
-                                    <th className="p-3">Video</th>
+                                    <th className="p-3 text-center">Images
+                                        {deleteView && type === 'ImageSlide' && (<i className="bi bi-trash-fill mt-2 text-danger text-red-600 text-2xl p-3"
+                                            role="button" onClick={DeleteAction}
+
+                                        ></i>)}
+                                    </th>
+
+                                    <th className="p-3 text-center">Video
+
+                                        {deleteView && type === 'VideoSlide' && (<i className="bi bi-trash-fill mx-2 px-1 text-danger text-red-600 text-xl" role="button"
+                                            onClick={DeleteAction}
+                                        ></i>)}
+                                    </th>
 
                                 </tr>
                             </thead>
@@ -208,132 +237,145 @@ export default function Dashboard() {
                                             key={index}
                                             className={`${slide.id % 2 === 0 ? 'bg-white' : 'bg-blue-50'} border-b border-gray-200`}
                                         >
-                                            <td className="p-3 font-semibold">{index + 1}</td>
-                                            <td className="p-3 uppercase">{slide.duration}</td>
+                                            <td className="p-3 font-semibold hidden lg:table-cell">{index + 1}</td>
+                                            <td className="p-3 uppercase text-start" >{slide.duration}</td>
 
                                             {/* Images */}
-                                            <td className="p-3  ">
-                                                {slide.ImageSlide && slide.ImageSlide.length > 0 ? (
-                                                    slide.ImageSlide.map((img, i) => (
-                                                        <div className='flex justify-start items-center' key={i}>
-                                                            <img className='my-6'
-                                                                key={i}
-                                                                src={`${url}/${img.filepath}`}
-                                                                alt={`Slide Image ${i + 1}`}
-                                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                                            />
-                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger text-red-600" role="button" onClick={() => Delete(slide.id, img.filename, 'ImageSlide')}></i>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <span>No Images</span>
-                                                )}
+                                            <td className="p-3 ">
+                                                <div className="flex flex-wrap justify-center">
+                                                    {slide.ImageSlide && slide.ImageSlide.length > 0 ? (
+                                                        slide.ImageSlide.map((img, i) => (
+                                                            <div key={i} className="flex items-center p-2 m-2 lg:w-1/4 ">
+                                                                <img
+                                                                    className={`lg:w-44 lg:h-32 md:w-36 md:h-28 w-48 h-32 cursor-pointer rounded-sm border-4 transition-all duration-300 ${selectedImages.includes(img.filename) ? 'border-blue-600' : 'border-transparent'
+                                                                        }`}
+                                                                    src={`${url}/${img.filepath}`}
+                                                                    alt={`Slide Image ${i + 1}`}
+
+                                                                    onClick={() => Delete(slide.id, img.filename, 'ImageSlide')}
+                                                                />
+
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div><span>No Images</span></div>
+                                                    )}
+                                                </div>
                                             </td>
+
 
                                             {/* videos */}
 
-                                            <td className="p-3  ">
-                                                {slide.VideoSlide && slide.VideoSlide.length > 0 ? (
-                                                    slide.VideoSlide.length > 0 && slide.VideoSlide.map((video, i) => (
-                                                        <div className='flex justify-start items-center' key={i}>
-                                                            <video className='my-6'
-                                                                key={i}
-                                                                src={`${url}/${video.filepath}`}
-                                                                alt={`Slide Image ${i + 1}`}
-                                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                                            />
-                                                            <i className="bi bi-trash-fill mx-2 px-1 text-danger text-red-600" role="button" onClick={() => Delete(slide.id, video.filename, 'VideoSlide')}></i>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <span>No Videos</span>
-                                                )}
+                                            < td className="p-3  " >
+                                                <div className="flex flex-wrap justify-center">
+                                                    {
+                                                        slide.VideoSlide && slide.VideoSlide.length > 0 ? (
+                                                            slide.VideoSlide.length > 0 && slide.VideoSlide.map((video, i) => (
+                                                                <div key={i} className="flex items-center p-2 m-2 md:w-1/3 w-full ">
+                                                                    <video
+                                                                        className={`lg:w-96 lg:h-72 md:w-36 md:h-28 w-48 h-32 cursor-pointer rounded-sm border-4 transition-all duration-300 ${selectedImages.includes(video.filename) ? 'border-blue-600' : 'border-transparent'
+                                                                            }`}
+                                                                        key={i}
+                                                                        src={`${url}/${video.filepath}`}
+                                                                        alt={`Slide Image ${i + 1}`}
+                                                                        onClick={() => Delete(slide.id, video.filename, 'VideoSlide')}
+                                                                    />
+
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div><span>No Videos</span></div>
+                                                        )
+                                                    }
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                             </tbody>
                         </table>
                     </div>
-                </main>
+                </main >
 
                 {/* Upload Modal */}
-                {see && (
-                    <div className="fixed inset-0 z-30 flex justify-center items-center bg-white/75">
-                        <div className="w-full max-w-3xl max-h-[90vh] overflow-auto bg-white rounded-lg shadow-lg p-6">
-                            <h4 className="text-center text-info text-2xl font-semibold mb-6">Upload Images and Videos</h4>
+                {
+                    see && (
+                        <div className="fixed inset-0 z-30 flex justify-center items-center bg-white/75">
+                            <div className="w-full max-w-3xl max-h-[90vh] overflow-auto bg-white rounded-lg shadow-lg p-6">
+                                <h4 className="text-center text-info text-2xl font-semibold mb-6">Upload Images and Videos</h4>
 
-                            <div className="flex flex-wrap -mx-2">
-                                <div className="w-full md:w-1/2 px-2 mb-4">
-                                    <label className="block text-info font-medium mb-1">Duration:</label>
-                                    <input
-                                        type="text"
-                                        className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
-                                        value={create.duration}
-                                        onChange={e => Create(e, 'duration')}
-                                    />
+                                <div className="flex flex-wrap -mx-2">
+                                    <div className="w-full md:w-1/2 px-2 mb-4">
+                                        <label className="block text-info font-medium mb-1">Duration:</label>
+                                        <input
+                                            type="text"
+                                            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
+                                            value={create.duration}
+                                            onChange={e => Create(e, 'duration')}
+                                        />
+                                    </div>
+
+                                    <div className="w-full md:w-1/2 px-2 mb-4">
+                                        <label className="block text-info font-medium mb-1">Image Upload:</label>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
+                                            onChange={e => Create(e, 'image')}
+                                        />
+                                        {create.image.length > 0 && (
+                                            <ul className="mt-2 text-sm text-gray-600">
+                                                {create.image.map((file, index) => (
+                                                    <li key={index}>{file.name}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        {progress > 0 && <p>Compression Progress: {progress.toFixed(0)}%</p>}
+                                        {statusMessage && <p>{statusMessage}</p>}
+                                    </div>
                                 </div>
 
-                                <div className="w-full md:w-1/2 px-2 mb-4">
-                                    <label className="block text-info font-medium mb-1">Image Upload:</label>
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
-                                        onChange={e => Create(e, 'image')}
-                                    />
-                                    {create.image.length > 0 && (
-                                        <ul className="mt-2 text-sm text-gray-600">
-                                            {create.image.map((file, index) => (
-                                                <li key={index}>{file.name}</li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                    {progress > 0 && <p>Compression Progress: {progress.toFixed(0)}%</p>}
-                                    {statusMessage && <p>{statusMessage}</p>}
+                                <div className="flex flex-wrap -mx-2 gap-7">
+                                    <div className="w-full md:w-1/2 px-2 mb-4">
+                                        <label className="block text-info font-medium mb-1">Video Upload:</label>
+                                        <input
+                                            accept="video/mp4,video/webm,video/ogg"
+                                            type="file"
+                                            multiple
+                                            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
+                                            onChange={e => Create(e, 'video')}
+                                        />
+                                        {create.video.length > 0 && (
+                                            <ul className="mt-2 text-sm text-gray-600">
+                                                {create.video.map((file, index) => (
+                                                    <li key={index}>{file.name}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex flex-wrap -mx-2 gap-7">
-                                <div className="w-full md:w-1/2 px-2 mb-4">
-                                    <label className="block text-info font-medium mb-1">Video Upload:</label>
-                                    <input
-                                        accept="video/mp4,video/webm,video/ogg"
-                                        type="file"
-                                        multiple
-                                        className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-info"
-                                        onChange={e => Create(e, 'video')}
-                                    />
-                                    {create.video.length > 0 && (
-                                        <ul className="mt-2 text-sm text-gray-600">
-                                            {create.video.map((file, index) => (
-                                                <li key={index}>{file.name}</li>
-                                            ))}
-                                        </ul>
-                                    )}
+                                <div className="flex justify-between mt-8">
+                                    <button
+                                        onClick={() => {
+                                            setSee(false);
+                                            setCreate({ duration: '', image: [] });
+                                            setProgress(0);
+                                            setStatusMessage('');
+                                        }}
+                                        className="bg-gray-100 hover:bg-gray-200 text-black font-semibold py-2 px-4 rounded"
+                                    >
+                                        Close
+                                    </button>
+                                    <button onClick={Save} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold py-2 px-4 rounded border border-white">
+                                        Save
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div className="flex justify-between mt-8">
-                                <button
-                                    onClick={() => {
-                                        setSee(false);
-                                        setCreate({ duration: '', image: [] });
-                                        setProgress(0);
-                                        setStatusMessage('');
-                                    }}
-                                    className="bg-gray-100 hover:bg-gray-200 text-black font-semibold py-2 px-4 rounded"
-                                >
-                                    Close
-                                </button>
-                                <button onClick={Save} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold py-2 px-4 rounded border border-white">
-                                    Save
-                                </button>
                             </div>
                         </div>
-                    </div>
-                )}
-            </section>
+                    )
+                }
+            </section >
         </div >
-    );
+    )
 }
