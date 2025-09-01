@@ -135,11 +135,15 @@ export default function Carousel() {
                 if (video && video.src) {
                     console.log("Trying to play video:", video.src)
 
-                    if (video && video.audioTracks && video.audioTracks.length > 0) {
-                        audio.pause()
-                    } else {
-                        audio.play()
+                    if (audio && !audio.paused) {
+                        audio.pause();
                     }
+
+                    // if (video && video.audioTracks && video.audioTracks.length > 0) {
+                    //     audio.pause()
+                    // } else {
+                    //     audio.play()
+                    // }
 
                     video.play().catch(err => {
                         console.error("Video playback error:", err)
